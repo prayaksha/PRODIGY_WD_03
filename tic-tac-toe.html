@@ -1,3 +1,175 @@
-To build a tic-tac-toe web application, you can use HTML, CSS, and JavaScript. By implementing functions to handle user clicks, track game state, and check for winning conditions, you can create an interactive and engaging tic-tac-toe game. With these technologies and functionalities, users can play against each other or against an AI opponent, aiming to get three markers in a row to win the game.
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TIC TAC TOE</title>
+  <style>
+    *{
+        background-color: skyblue;
+    }
+    body {
+      font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      flex-direction: column;
+    }
 
+    #board {
+      background-color: pink;
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-gap: 5px;
+      margin-bottom: 20px;
+    }
 
+    .cell {
+      background-color: green;
+      width: 100px;
+      height: 100px;
+      font-size: 24px;
+      text-align: center;
+      vertical-align: middle;
+      cursor: pointer;
+      border: 2px solid black;
+    }
+
+    #message {
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>TIC TAC TOE</h1>
+<p id="message">Click a cell to start the game</p>
+
+<div id="board"></div>
+
+<script>
+  // Game variables
+  const board = ['', '', '', '', '', '', '', '', ''];
+  let currentPlayer = 'X';
+  let gameActive = true;
+  let isAgainstAI = false;
+
+  // Create the game board
+  const boardElement = document.getElementById('board');
+  for (let i = 0; i < 9; i++) {
+    const cell = document.createElement('div');
+    cell.classList.add('cell');
+    cell.dataset.index = i;
+    cell.addEventListener('click', handleCellClick);
+    boardElement.appendChild(cell);
+  }
+
+  // Handle cell click
+  function handleCellClick(event) {
+    if (!gameActive) return;
+
+    const index = event.target.dataset.index;
+
+    if (board[index] === '') {
+      board[index] = currentPlayer;
+      event.target.textContent = currentPlayer;
+
+      if (checkWinner()) {
+        displayMessage(`Player ${currentPlayer} wins!`);
+        gameActive = false;
+      } else if (board.every(cell => cell !== '')) {
+        displayMessage('It\'s a tie!');
+        gameActive = false;
+      } else {
+        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        if (isAgainstAI && currentPlayer === 'O') {
+          makeAIMove();
+        }
+      }
+    }
+  }
+
+  // Check for a winner
+  function checkWinner() {
+    const winPatterns = [
+      [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+      [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+      [0, 4, 8], [2, 4, 6]             // Diagonals
+    ];
+
+    for (const pattern of winPatterns) {
+      const [a, b, c] = pattern;
+      if (board[a] !== '' && board[a] === board[b] && board[b] === board[c]) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  // Display a message
+  function displayMessage(message) {
+    document.getElementById('message').textContent = message;
+  }
+
+  // AI move (random)
+  function makeAIMove() {
+    const emptyCells = board.reduce((acc, cell, index) => {
+      if (cell === '') {
+        acc.push(index);
+      }
+      return acc;
+    }, []);
+
+    const randomIndex = Math.floor(Math.random() * emptyCells.length);
+    const aiMove = emptyCells[randomIndex];
+
+    setTimeout(() => {
+      board[aiMove] = 'O';
+      document.querySelector(`.cell[data-index="${aiMove}"]`).textContent = 'O';
+
+      if (checkWinner()) {
+        displayMessage('AI wins!');
+        gameActive = false;
+      } else if (board.every(cell => cell !== '')) {
+        displayMessage('It\'s a tie!');
+        gameActive = false;
+      } else {
+        currentPlayer = 'X';
+      }
+    }, 500);
+  }
+</script>
+
+<!-- Add a button to toggle playing against AI -->
+<button onclick="toggleAgainstAI()">Play Against AI</button>
+
+<script>
+  // Toggle playing against AI
+  function toggleAgainstAI() {
+    isAgainstAI = !isAgainstAI;
+    gameActive = true;
+    currentPlayer = 'X';
+    board.fill('');
+    document.getElementById('message').textContent = 'Click a cell to start the game';
+
+    // Clear the board
+    const cells = document.querySelectorAll('.cell');
+    cells.forEach(cell => {
+      cell.textContent = '';
+    });
+
+    // If playing against AI and it's AI's turn, make a move
+    if (isAgainstAI && currentPlayer === 'O') {
+      makeAIMove();
+    }
+  }
+</script>
+<footer>Instructions:<br>
+  1.To play with your friend directly start playing in the grid given.<br>
+  2.To play with AI click on the button provided "Play against AI".
+</footer>
+</body>
+</html>
